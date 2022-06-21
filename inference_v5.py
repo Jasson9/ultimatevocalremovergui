@@ -19,15 +19,13 @@ from datetime import datetime
 
 # Command line text parsing and widget manipulation
 from collections import defaultdict
-import tkinter as tk
 import traceback  # Error Message Recent Calls
 import time  # Timer
 
 class VocalRemover(object):
     
-    def __init__(self, data, text_widget: tk.Text):
+    def __init__(self, data, ):
         self.data = data
-        self.text_widget = text_widget
         self.models = defaultdict(lambda: None)
         self.devices = defaultdict(lambda: None)
         # self.offset = model.offset
@@ -57,14 +55,6 @@ data = {
 default_window_size = data['window_size']
 default_agg = data['agg']
 
-def update_progress(progress_var, total_files, file_num, step: float = 1):
-    """Calculate the progress for the progress widget in the GUI"""
-    base = (100 / total_files)
-    progress = base * (file_num - 1)
-    progress += base * step
-
-    progress_var.set(progress)
-
 def get_baseText(total_files, file_num):
     """Create the base text for the command widget"""
     text = 'File {file_num}/{total_files} '.format(file_num=file_num,
@@ -90,7 +80,7 @@ def determineModelFolderName():
 
     return modelFolderName
 
-def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress_var: tk.Variable,
+def main(
          **kwargs: dict):
     
     global model_params_d
@@ -253,14 +243,6 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                 except Exception as e:
                     traceback_text = ''.join(traceback.format_tb(e.__traceback__))
                     errmessage = f'Traceback Error: "{traceback_text}"\n{type(e).__name__}: "{e}"\n'
-                    if "ffmpeg" in errmessage:
-                        text_widget.write(base_text + 'Failed to save output(s) as Mp3(s).\n')
-                        text_widget.write(base_text + 'FFmpeg might be missing or corrupted, please check error log.\n')
-                        text_widget.write(base_text + 'Moving on...\n')
-                    else:
-                        text_widget.write(base_text + 'Failed to save output(s) as Mp3(s).\n')
-                        text_widget.write(base_text + 'Please check error log.\n')
-                        text_widget.write(base_text + 'Moving on...\n')
                     try:
                         with open('errorlog.txt', 'w') as f:
                             f.write(f'Last Error Received:\n\n' +
@@ -327,15 +309,6 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                                     pass        
                 except Exception as e:
                     traceback_text = ''.join(traceback.format_tb(e.__traceback__))
-                    errmessage = f'Traceback Error: "{traceback_text}"\n{type(e).__name__}: "{e}"\n'
-                    if "ffmpeg" in errmessage:
-                        text_widget.write(base_text + 'Failed to save output(s) as Flac(s).\n')
-                        text_widget.write(base_text + 'FFmpeg might be missing or corrupted, please check error log.\n')
-                        text_widget.write(base_text + 'Moving on...\n')
-                    else:
-                        text_widget.write(base_text + 'Failed to save output(s) as Flac(s).\n')
-                        text_widget.write(base_text + 'Please check error log.\n')
-                        text_widget.write(base_text + 'Moving on...\n')
                     try:
                         with open('errorlog.txt', 'w') as f:
                             f.write(f'Last Error Received:\n\n' +
@@ -358,11 +331,8 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
     default_agg = data['agg']
 
     stime = time.perf_counter()
-    progress_var.set(0)
-    text_widget.clear()
-    button_widget.configure(state=tk.DISABLED)  # Disable Button
 
-    vocal_remover = VocalRemover(data, text_widget)
+    vocal_remover = VocalRemover(data)
     modelFolderName = determineModelFolderName()
 
     # Separation Preperation
@@ -377,38 +347,12 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                         # -Get text and update progress-
                         base_text = get_baseText(total_files=len(data['input_paths']),
                                                     file_num=file_num)
-                        progress_kwargs = {'progress_var': progress_var,
+                        progress_kwargs = {
                                         'total_files': len(data['input_paths']),
-                                        'file_num': file_num}
-                        update_progress(**progress_kwargs,
-                                        step=0)        
+                                        'file_num': file_num}  
                 
-                        try:
-                            total, used, free = shutil.disk_usage("/") 
-                                
-                            total_space = int(total/1.074e+9)
-                            used_space = int(used/1.074e+9)
-                            free_space = int(free/1.074e+9)
-                                
-                            if int(free/1.074e+9) <= int(2):
-                                text_widget.write('Error: Not enough storage on main drive to continue. Your main drive must have \nat least 3 GB\'s of storage in order for this application function properly. \n\nPlease ensure your main drive has at least 3 GB\'s of storage and try again.\n\n')
-                                text_widget.write('Detected Total Space: ' + str(total_space) + ' GB' + '\n')
-                                text_widget.write('Detected Used Space: ' + str(used_space) + ' GB' + '\n')
-                                text_widget.write('Detected Free Space: ' + str(free_space) + ' GB' + '\n')
-                                progress_var.set(0)
-                                button_widget.configure(state=tk.NORMAL)  # Enable Button
-                                return 
-                            
-                            if int(free/1.074e+9) in [3, 4, 5, 6, 7, 8]:
-                                text_widget.write('Warning: Your main drive is running low on storage. Your main drive must have \nat least 3 GB\'s of storage in order for this application function properly.\n\n')
-                                text_widget.write('Detected Total Space: ' + str(total_space) + ' GB' + '\n')
-                                text_widget.write('Detected Used Space: ' + str(used_space) + ' GB' + '\n')
-                                text_widget.write('Detected Free Space: ' + str(free_space) + ' GB' + '\n\n')
-                        except:
-                            pass
                 
                         #Load Model      
-                        text_widget.write(base_text + 'Loading models...')
                         
                         model_size = math.ceil(os.stat(data['instrumentalModel']).st_size / 1024)
                         nn_architecture = '{}KB'.format(min(nn_arch_sizes, key=lambda x:abs(x-model_size)))
@@ -578,7 +522,6 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                             model_params_auto=str('lib_v5/modelparams/tmodelparam.json')
                             param_name_auto=str('User Model Param Set')
   
-                        text_widget.write(' Done!\n')
                         
                         
                         if data['ModelParams'] == 'Auto':
@@ -590,20 +533,10 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                         
                         try:
                             print('Model Parameters:', model_params_d)
-                            text_widget.write(base_text + 'Loading assigned model parameters ' + '\"' + param_name + '\"... ')
+                        
                         except Exception as e:
                             traceback_text = ''.join(traceback.format_tb(e.__traceback__))
                             errmessage = f'Traceback Error: "{traceback_text}"\n{type(e).__name__}: "{e}"\n'
-                            text_widget.write("\n" + base_text + f'Separation failed for the following audio file:\n')
-                            text_widget.write(base_text + f'"{os.path.basename(music_file)}"\n')
-                            text_widget.write(f'\nError Received:\n\n')
-                            text_widget.write(f'Model parameters are missing.\n\n')
-                            text_widget.write(f'Please check the following:\n')
-                            text_widget.write(f'1. Make sure the model is still present.\n')
-                            text_widget.write(f'2. If you are running a model that was not originally included in this package, \nplease append the modelparam name to the model name.\n')
-                            text_widget.write(f'  - Example if using \"4band_v2.json\" modelparam: \"model_4band_v2.pth\"\n\n')
-                            text_widget.write(f'Please address this and try again.\n\n')
-                            text_widget.write(f'Time Elapsed: {time.strftime("%H:%M:%S", time.gmtime(int(time.perf_counter() - stime)))}')
                             try:
                                 with open('errorlog.txt', 'w') as f:
                                     f.write(f'Last Error Received:\n\n' +
@@ -620,13 +553,10 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                             except:
                                 pass
                             torch.cuda.empty_cache()
-                            progress_var.set(0)
-                            button_widget.configure(state=tk.NORMAL)  # Enable Button
                             return
                         
                         
                         mp = ModelParameters(model_params_d)
-                        text_widget.write('Done!\n')
                         # -Instrumental-
                         if os.path.isfile(data['instrumentalModel']):
                             device = torch.device('cpu')
@@ -647,7 +577,6 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                             
                         # -Go through the different steps of seperation-
                         # Wave source
-                        text_widget.write(base_text + 'Loading audio source...')
                         
                         X_wave, y_wave, X_spec_s, y_spec_s = {}, {}, {}, {}
                         
@@ -674,17 +603,6 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                                 input_high_end_h = (bp['n_fft']//2 - bp['crop_stop']) + (mp.param['pre_filter_stop'] - mp.param['pre_filter_start'])
                                 input_high_end = X_spec_s[d][:, bp['n_fft']//2-input_high_end_h:bp['n_fft']//2, :]
                         
-                        text_widget.write('Done!\n')
-
-                        update_progress(**progress_kwargs,
-                                        step=0.1)
-
-                        text_widget.write(base_text + 'Loading the stft of audio source...')
-                        
-                        text_widget.write(' Done!\n')
-                        
-                        text_widget.write(base_text + "Please Wait...\n")
-
                         X_spec_m = spec_utils.combine_spectrograms(X_spec_s, mp)
                         
                         del X_wave, X_spec_s
@@ -700,12 +618,8 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                                     iterations = [n_window]
 
                                     total_iterations = sum(iterations)
-                                
-                                    text_widget.write(base_text + "Processing "f"{total_iterations} Slices... ")
-                                    
+                                                                    
                                     for i in tqdm(range(n_window)): 
-                                        update_progress(**progress_kwargs,
-                                            step=(0.1 + (0.8/n_window * i)))
                                         start = i * roi_size
                                         X_mag_window = X_mag_pad[None, :, :, start:start + data['window_size']]
                                         X_mag_window = torch.from_numpy(X_mag_window).to(device)
@@ -716,7 +630,6 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                                         preds.append(pred[0])
                                         
                                     pred = np.concatenate(preds, axis=2)
-                                    text_widget.write('Done!\n')
                                 return pred
                             
                             def preprocess(X_spec):
@@ -762,26 +675,20 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                         aggressiveness = {'value': aggresive_set, 'split_bin': mp.param['band'][1]['crop_stop']}
                         
                         if data['tta']:
-                            text_widget.write(base_text + "Running Inferences (TTA)...\n")
+                            print(base_text + "Running Inferences (TTA)...\n")
                         else:
-                            text_widget.write(base_text + "Running Inference...\n")
+                            print(base_text + "Running Inference...\n")
                         
                         pred, X_mag, X_phase = inference(X_spec_m,
                                                                 device,
                                                                 model, aggressiveness)
 
-                        update_progress(**progress_kwargs,
-                                        step=0.9)
                         # Postprocess
                         if data['postprocess']:
                             try:
-                                text_widget.write(base_text + 'Post processing...')
                                 pred_inv = np.clip(X_mag - pred, 0, np.inf)
                                 pred = spec_utils.mask_silence(pred, pred_inv)
-                                text_widget.write(' Done!\n')
                             except Exception as e:
-                                text_widget.write('\n' + base_text + 'Post process failed, check error log.\n')
-                                text_widget.write(base_text + 'Moving on...\n')
                                 traceback_text = ''.join(traceback.format_tb(e.__traceback__))
                                 errmessage = f'Traceback Error: "{traceback_text}"\n{type(e).__name__}: "{e}"\n'
                                 try:
@@ -795,9 +702,6 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                                 except:
                                     pass
 
-                            update_progress(**progress_kwargs,
-                                            step=0.95)
-
                         # Inverse stft
                         y_spec_m = pred * X_phase
                         v_spec_m = X_spec_m - y_spec_m
@@ -805,7 +709,7 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                         if data['voc_only'] and not data['inst_only']:
                             pass
                         else:
-                            text_widget.write(base_text + 'Saving Instrumental... ')
+                            print(base_text + 'Saving Instrumental... ')
                         
                         if data['high_end_process'].startswith('mirroring'):        
                             input_high_end_ = spec_utils.mirroring(data['high_end_process'], y_spec_m, input_high_end, mp)
@@ -813,18 +717,18 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                             if data['voc_only'] and not data['inst_only']:
                                 pass
                             else:
-                                text_widget.write('Done!\n')   
+                                print('Done!\n')   
                         else:
                             wav_instrument = spec_utils.cmb_spectrogram_to_wave(y_spec_m, mp)
                             if data['voc_only'] and not data['inst_only']:
                                 pass
                             else:
-                                text_widget.write('Done!\n')    
+                                print('Done!\n')    
 
                         if data['inst_only'] and not data['voc_only']:
                             pass
                         else:
-                            text_widget.write(base_text + 'Saving Vocals... ')
+                            print(base_text + 'Saving Vocals... ')
                         
                         if data['high_end_process'].startswith('mirroring'):        
                             input_high_end_ = spec_utils.mirroring(data['high_end_process'], v_spec_m, input_high_end, mp)
@@ -833,22 +737,16 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                             if data['inst_only'] and not data['voc_only']:
                                     pass
                             else:
-                                text_widget.write('Done!\n')     
+                                print('Done!\n')     
                         else:        
                             wav_vocals = spec_utils.cmb_spectrogram_to_wave(v_spec_m, mp)
                             if data['inst_only'] and not data['voc_only']:
                                     pass
                             else:
-                                text_widget.write('Done!\n')     
-
-                        update_progress(**progress_kwargs,
-                                        step=1)
+                                print('Done!\n')     
                         
                         # Save output music files
                         save_files(wav_instrument, wav_vocals)
-
-                        update_progress(**progress_kwargs,
-                                        step=1)
 
                         # Save output image
                         if data['output_image']:
@@ -862,17 +760,17 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                                 bin_image.tofile(f)
            
 
-                        text_widget.write(base_text + 'Completed Seperation!\n\n')
+                        print(base_text + 'Completed Seperation!\n\n')
     except Exception as e:
         traceback_text = ''.join(traceback.format_tb(e.__traceback__))
         message = f'Traceback Error: "{traceback_text}"\n{type(e).__name__}: "{e}"\n'
         if runtimeerr in message:
-            text_widget.write("\n" + base_text + f'Separation failed for the following audio file:\n')
-            text_widget.write(base_text + f'"{os.path.basename(music_file)}"\n')
-            text_widget.write(f'\nError Received:\n\n')
-            text_widget.write(f'Your PC cannot process this audio file with the chunk size selected.\nPlease lower the chunk size and try again.\n\n')
-            text_widget.write(f'If this error persists, please contact the developers.\n\n')
-            text_widget.write(f'Time Elapsed: {time.strftime("%H:%M:%S", time.gmtime(int(time.perf_counter() - stime)))}')
+            print("\n" + base_text + f'Separation failed for the following audio file:\n')
+            print(base_text + f'"{os.path.basename(music_file)}"\n')
+            print(f'\nError Received:\n\n')
+            print(f'Your PC cannot process this audio file with the chunk size selected.\nPlease lower the chunk size and try again.\n\n')
+            print(f'If this error persists, please contact the developers.\n\n')
+            print(f'Time Elapsed: {time.strftime("%H:%M:%S", time.gmtime(int(time.perf_counter() - stime)))}')
             try:
                 with open('errorlog.txt', 'w') as f:
                     f.write(f'Last Error Received:\n\n' +
@@ -885,18 +783,16 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
             except:
                 pass
             torch.cuda.empty_cache()
-            progress_var.set(0)
-            button_widget.configure(state=tk.NORMAL)  # Enable Button
             return 
         
         if cuda_err in message:
-            text_widget.write("\n" + base_text + f'Separation failed for the following audio file:\n')
-            text_widget.write(base_text + f'"{os.path.basename(music_file)}"\n')
-            text_widget.write(f'\nError Received:\n\n')
-            text_widget.write(f'The application was unable to allocate enough GPU memory to use this model.\n')
-            text_widget.write(f'Please close any GPU intensive applications and try again.\n')
-            text_widget.write(f'If the error persists, your GPU might not be supported.\n\n')
-            text_widget.write(f'Time Elapsed: {time.strftime("%H:%M:%S", time.gmtime(int(time.perf_counter() - stime)))}')
+            print("\n" + base_text + f'Separation failed for the following audio file:\n')
+            print(base_text + f'"{os.path.basename(music_file)}"\n')
+            print(f'\nError Received:\n\n')
+            print(f'The application was unable to allocate enough GPU memory to use this model.\n')
+            print(f'Please close any GPU intensive applications and try again.\n')
+            print(f'If the error persists, your GPU might not be supported.\n\n')
+            print(f'Time Elapsed: {time.strftime("%H:%M:%S", time.gmtime(int(time.perf_counter() - stime)))}')
             try:
                 with open('errorlog.txt', 'w') as f:
                     f.write(f'Last Error Received:\n\n' +
@@ -910,19 +806,17 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
             except:
                 pass
             torch.cuda.empty_cache()
-            progress_var.set(0)
-            button_widget.configure(state=tk.NORMAL)  # Enable Button
             return
         
         if mod_err in message:
-            text_widget.write("\n" + base_text + f'Separation failed for the following audio file:\n')
-            text_widget.write(base_text + f'"{os.path.basename(music_file)}"\n')
-            text_widget.write(f'\nError Received:\n\n')
-            text_widget.write(f'Application files(s) are missing.\n')
-            text_widget.write("\n" + f'{type(e).__name__} - "{e}"' + "\n\n")
-            text_widget.write(f'Please check for missing files/scripts in the app directory and try again.\n')
-            text_widget.write(f'If the error persists, please reinstall application or contact the developers.\n\n')
-            text_widget.write(f'Time Elapsed: {time.strftime("%H:%M:%S", time.gmtime(int(time.perf_counter() - stime)))}')
+            print("\n" + base_text + f'Separation failed for the following audio file:\n')
+            print(base_text + f'"{os.path.basename(music_file)}"\n')
+            print(f'\nError Received:\n\n')
+            print(f'Application files(s) are missing.\n')
+            print("\n" + f'{type(e).__name__} - "{e}"' + "\n\n")
+            print(f'Please check for missing files/scripts in the app directory and try again.\n')
+            print(f'If the error persists, please reinstall application or contact the developers.\n\n')
+            print(f'Time Elapsed: {time.strftime("%H:%M:%S", time.gmtime(int(time.perf_counter() - stime)))}')
             try:
                 with open('errorlog.txt', 'w') as f:
                     f.write(f'Last Error Received:\n\n' +
@@ -935,19 +829,17 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
             except:
                 pass
             torch.cuda.empty_cache()
-            progress_var.set(0)
-            button_widget.configure(state=tk.NORMAL)  # Enable Button
             return 
         
         if file_err in message:
-            text_widget.write("\n" + base_text + f'Separation failed for the following audio file:\n')
-            text_widget.write(base_text + f'"{os.path.basename(music_file)}"\n')
-            text_widget.write(f'\nError Received:\n\n')
-            text_widget.write(f'Missing file error raised.\n')
-            text_widget.write("\n" + f'{type(e).__name__} - "{e}"' + "\n\n")
-            text_widget.write("\n" + f'Please address the error and try again.' + "\n")
-            text_widget.write(f'If this error persists, please contact the developers.\n\n')
-            text_widget.write(f'Time Elapsed: {time.strftime("%H:%M:%S", time.gmtime(int(time.perf_counter() - stime)))}')
+            print("\n" + base_text + f'Separation failed for the following audio file:\n')
+            print(base_text + f'"{os.path.basename(music_file)}"\n')
+            print(f'\nError Received:\n\n')
+            print(f'Missing file error raised.\n')
+            print("\n" + f'{type(e).__name__} - "{e}"' + "\n\n")
+            print("\n" + f'Please address the error and try again.' + "\n")
+            print(f'If this error persists, please contact the developers.\n\n')
+            print(f'Time Elapsed: {time.strftime("%H:%M:%S", time.gmtime(int(time.perf_counter() - stime)))}')
             torch.cuda.empty_cache()
             try:
                 with open('errorlog.txt', 'w') as f:
@@ -960,20 +852,18 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                             message + f'\nError Time Stamp [{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}]\n') 
             except:
                 pass
-            progress_var.set(0)
-            button_widget.configure(state=tk.NORMAL)  # Enable Button
             return 
         
         if ffmp_err in message:
-            text_widget.write("\n" + base_text + f'Separation failed for the following audio file:\n')
-            text_widget.write(base_text + f'"{os.path.basename(music_file)}"\n')
-            text_widget.write(f'\nError Received:\n\n')
-            text_widget.write(f'The input file type is not supported or FFmpeg is missing.\n')
-            text_widget.write(f'Please select a file type supported by FFmpeg and try again.\n\n')
-            text_widget.write(f'If FFmpeg is missing or not installed, you will only be able to process \".wav\" files \nuntil it is available on this system.\n\n')
-            text_widget.write(f'See the \"More Info\" tab in the Help Guide.\n\n')
-            text_widget.write(f'If this error persists, please contact the developers.\n\n')
-            text_widget.write(f'Time Elapsed: {time.strftime("%H:%M:%S", time.gmtime(int(time.perf_counter() - stime)))}')
+            print("\n" + base_text + f'Separation failed for the following audio file:\n')
+            print(base_text + f'"{os.path.basename(music_file)}"\n')
+            print(f'\nError Received:\n\n')
+            print(f'The input file type is not supported or FFmpeg is missing.\n')
+            print(f'Please select a file type supported by FFmpeg and try again.\n\n')
+            print(f'If FFmpeg is missing or not installed, you will only be able to process \".wav\" files \nuntil it is available on this system.\n\n')
+            print(f'See the \"More Info\" tab in the Help Guide.\n\n')
+            print(f'If this error persists, please contact the developers.\n\n')
+            print(f'Time Elapsed: {time.strftime("%H:%M:%S", time.gmtime(int(time.perf_counter() - stime)))}')
             torch.cuda.empty_cache()
             try:
                 with open('errorlog.txt', 'w') as f:
@@ -987,19 +877,17 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                             message + f'\nError Time Stamp [{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}]\n') 
             except:
                 pass
-            progress_var.set(0)
-            button_widget.configure(state=tk.NORMAL)  # Enable Button
             return 
         
         if sf_write_err in message:
-            text_widget.write("\n" + base_text + f'Separation failed for the following audio file:\n')
-            text_widget.write(base_text + f'"{os.path.basename(music_file)}"\n')
-            text_widget.write(f'\nError Received:\n\n')
-            text_widget.write(f'Could not write audio file.\n')
-            text_widget.write(f'This could be due to low storage on target device or a system permissions issue.\n')
-            text_widget.write(f"\nFor raw error details, go to the Error Log tab in the Help Guide.\n")
-            text_widget.write(f'\nIf the error persists, please contact the developers.\n\n')
-            text_widget.write(f'Time Elapsed: {time.strftime("%H:%M:%S", time.gmtime(int(time.perf_counter() - stime)))}')
+            print("\n" + base_text + f'Separation failed for the following audio file:\n')
+            print(base_text + f'"{os.path.basename(music_file)}"\n')
+            print(f'\nError Received:\n\n')
+            print(f'Could not write audio file.\n')
+            print(f'This could be due to low storage on target device or a system permissions issue.\n')
+            print(f"\nFor raw error details, go to the Error Log tab in the Help Guide.\n")
+            print(f'\nIf the error persists, please contact the developers.\n\n')
+            print(f'Time Elapsed: {time.strftime("%H:%M:%S", time.gmtime(int(time.perf_counter() - stime)))}')
             try:
                 with open('errorlog.txt', 'w') as f:
                     f.write(f'Last Error Received:\n\n' +
@@ -1012,19 +900,17 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
             except:
                 pass
             torch.cuda.empty_cache()
-            progress_var.set(0)
-            button_widget.configure(state=tk.NORMAL)  # Enable Button
             return 
         
         if systemmemerr in message:
-            text_widget.write("\n" + base_text + f'Separation failed for the following audio file:\n')
-            text_widget.write(base_text + f'"{os.path.basename(music_file)}"\n')
-            text_widget.write(f'\nError Received:\n\n')
-            text_widget.write(f'The application was unable to allocate enough system memory to use this \nmodel.\n\n')
-            text_widget.write(f'Please do the following:\n\n1. Restart this application.\n2. Ensure any CPU intensive applications are closed.\n3. Then try again.\n\n')
-            text_widget.write(f'Please Note: Intel Pentium and Intel Celeron processors do not work well with \nthis application.\n\n')
-            text_widget.write(f'If the error persists, the system may not have enough RAM, or your CPU might \nnot be supported.\n\n')
-            text_widget.write(f'Time Elapsed: {time.strftime("%H:%M:%S", time.gmtime(int(time.perf_counter() - stime)))}')
+            print("\n" + base_text + f'Separation failed for the following audio file:\n')
+            print(base_text + f'"{os.path.basename(music_file)}"\n')
+            print(f'\nError Received:\n\n')
+            print(f'The application was unable to allocate enough system memory to use this \nmodel.\n\n')
+            print(f'Please do the following:\n\n1. Restart this application.\n2. Ensure any CPU intensive applications are closed.\n3. Then try again.\n\n')
+            print(f'Please Note: Intel Pentium and Intel Celeron processors do not work well with \nthis application.\n\n')
+            print(f'If the error persists, the system may not have enough RAM, or your CPU might \nnot be supported.\n\n')
+            print(f'Time Elapsed: {time.strftime("%H:%M:%S", time.gmtime(int(time.perf_counter() - stime)))}')
             try:
                 with open('errorlog.txt', 'w') as f:
                     f.write(f'Last Error Received:\n\n' +
@@ -1038,35 +924,19 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
             except:
                 pass
             torch.cuda.empty_cache()
-            progress_var.set(0)
-            button_widget.configure(state=tk.NORMAL)  # Enable Button
             return 
         
         print(traceback_text)
         print(type(e).__name__, e)
         print(message)
-        
-        try:
-            with open('errorlog.txt', 'w') as f:
-                f.write(f'Last Error Received:\n\n' +
-                        f'Error Received while processing "{os.path.basename(music_file)}":\n' + 
-                        f'Process Method: VR Architecture\n\n' +
-                        f'If this error persists, please contact the developers with the error details.\n\n' +
-                        message + f'\nError Time Stamp [{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}]\n') 
-        except:
-            tk.messagebox.showerror(master=window,
-                            title='Error Details',
-                            message=message)
-        progress_var.set(0)
-        text_widget.write("\n" + base_text + f'Separation failed for the following audio file:\n')
-        text_widget.write(base_text + f'"{os.path.basename(music_file)}"\n')
-        text_widget.write(f'\nError Received:\n')
-        text_widget.write("\nFor raw error details, go to the Error Log tab in the Help Guide.\n")
-        text_widget.write("\n" + f'Please address the error and try again.' + "\n")
-        text_widget.write(f'If this error persists, please contact the developers with the error details.\n\n')
-        text_widget.write(f'Time Elapsed: {time.strftime("%H:%M:%S", time.gmtime(int(time.perf_counter() - stime)))}')
+        print("\n" + base_text + f'Separation failed for the following audio file:\n')
+        print(base_text + f'"{os.path.basename(music_file)}"\n')
+        print(f'\nError Received:\n')
+        print("\nFor raw error details, go to the Error Log tab in the Help Guide.\n")
+        print("\n" + f'Please address the error and try again.' + "\n")
+        print(f'If this error persists, please contact the developers with the error details.\n\n')
+        print(f'Time Elapsed: {time.strftime("%H:%M:%S", time.gmtime(int(time.perf_counter() - stime)))}')
         torch.cuda.empty_cache()
-        button_widget.configure(state=tk.NORMAL)  # Enable Button
         return
 
     try:
@@ -1074,8 +944,6 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
     except:
         pass
 
-    progress_var.set(0)
-    text_widget.write(f'Conversion(s) Completed!\n')
-    text_widget.write(f'Time Elapsed: {time.strftime("%H:%M:%S", time.gmtime(int(time.perf_counter() - stime)))}')  # nopep8
+    print(f'Conversion(s) Completed!\n')
+    print(f'Time Elapsed: {time.strftime("%H:%M:%S", time.gmtime(int(time.perf_counter() - stime)))}')  # nopep8
     torch.cuda.empty_cache()
-    button_widget.configure(state=tk.NORMAL)  # Enable Button
