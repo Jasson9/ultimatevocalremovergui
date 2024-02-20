@@ -39,7 +39,6 @@ def check_checksum(path: Path, checksum: str):
         raise ModelLoadingError(f'Invalid checksum for file {path}, '
                                 f'expected {checksum} but got {actual_checksum}')
 
-
 class ModelOnlyRepo:
     """Base class for all model only repos.
     """
@@ -51,14 +50,8 @@ class ModelOnlyRepo:
 
 
 class RemoteRepo(ModelOnlyRepo):
-    def __init__(self, root_url: str, remote_files: tp.List[str]):
-        if not root_url.endswith('/'):
-            root_url += '/'
-        self._models: tp.Dict[str, str] = {}
-        for file in remote_files:
-            sig, checksum = file.split('.')[0].split('-')
-            assert sig not in self._models
-            self._models[sig] = root_url + file
+    def __init__(self, models: tp.Dict[str, str]):
+        self._models = models
 
     def has_model(self, sig: str) -> bool:
         return sig in self._models
@@ -88,6 +81,7 @@ class LocalRepo(ModelOnlyRepo):
                 else:
                     xp_sig = file.stem
                 if xp_sig in self._models:
+                    print('Whats xp? ', xp_sig)
                     raise ModelLoadingError(
                         f'Duplicate pre-trained model exist for signature {xp_sig}. '
                         'Please delete all but one.')
@@ -147,6 +141,7 @@ class AnyModelRepo:
         return self.model_repo.has_model(name_or_sig) or self.bag_repo.has_model(name_or_sig)
 
     def get_model(self, name_or_sig: str) -> AnyModel:
+        print('name_or_sig: ', name_or_sig)
         if self.model_repo.has_model(name_or_sig):
             return self.model_repo.get_model(name_or_sig)
         else:

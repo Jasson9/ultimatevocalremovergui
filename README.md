@@ -1,135 +1,234 @@
-# Ultimate Vocal Remover GUI v5.3.0
-<img src="https://github.com/Anjok07/ultimatevocalremovergui/blob/master/img/UVR_v5.3.0.png?raw=true" />
+# Ultimate Vocal Remover GUI v5.6
+<img src="https://raw.githubusercontent.com/Anjok07/ultimatevocalremovergui/master/gui_data/img/UVR_v5.6.png?raw=true" />
 
 [![Release](https://img.shields.io/github/release/anjok07/ultimatevocalremovergui.svg)](https://github.com/anjok07/ultimatevocalremovergui/releases/latest)
 [![Downloads](https://img.shields.io/github/downloads/anjok07/ultimatevocalremovergui/total.svg)](https://github.com/anjok07/ultimatevocalremovergui/releases)
 
 ## About
 
-This application uses state-of-the-art source separation models to remove vocals from audio files. UVR's core developers trained all of the models provided in this package (except for the Demucs helper model).
+This application uses state-of-the-art source separation models to remove vocals from audio files. UVR's core developers trained all of the models provided in this package (except for the Demucs v3 and v4 4-stem models).
 
 - **Core Developers**
     - [Anjok07](https://github.com/anjok07)
     - [aufr33](https://github.com/aufr33)
 
+- **Support the Project**
+    - [Donate](https://www.buymeacoffee.com/uvr5)
+
 ## Installation
 
-### Windows Installation
+These bundles contain the UVR interface, Python, PyTorch, and other dependencies needed to run the application effectively. No prerequisites are required.
 
-This installation bundle contains the UVR interface, Python (stripped to the bare essentials), PyTorch, and other dependencies needed to run the application effectively. No prerequisite installs required.
+### Windows Installation
 
 - Please Note:
     - This installer is intended for those running Windows 10 or higher. 
     - Application functionality for systems running Windows 7 or lower is not guaranteed.
-    - Application functionality for Intel Pentium & Celeron CPU systems is not guaranteed.
+    - Application functionality for Intel Pentium & Celeron CPUs systems is not guaranteed.
+    - You must install UVR to the main C:\ drive. Installing UVR to a secondary drive will cause instability.
 
-- Download the UVR installer via the link below:
-    - [Main Download Link](https://uvr.uvr.workers.dev/UVR_v5.3_setup.exe)
+- Download the UVR installer for Windows via the link below:
+    - [Main Download Link](https://github.com/Anjok07/ultimatevocalremovergui/releases/download/v5.6/UVR_v5.6.0_setup.exe)
+    - [Main Download Link mirror](https://www.mediafire.com/file_premium/jiatpgp0ljou52p/UVR_v5.6.0_setup.exe/file)
+- If you use an **AMD Radeon or Intel Arc graphics card**, you can try the OpenCL version:
+    - [OpenCL Version - Main Download Link](https://github.com/Anjok07/ultimatevocalremovergui/releases/download/v5.6/UVR_v5.6.0_setup_opencl.exe)
+- Update Package instructions for those who have UVR already installed:
+    - If you already have UVR installed you can install this package over it or download it straight from the application or [click here for the patch](https://github.com/Anjok07/ultimatevocalremovergui/releases/download/v5.6/UVR_Patch_10_6_23_4_27.exe).
 
-- **Optional**
-    - The Model Expansion Pack can be downloaded [here](https://github.com/Anjok07/ultimatevocalremovergui/releases/download/v5.3.0/v5_model_expansion_pack.zip)
-        - Please navigate to the "Updates" tab within the Help Guide provided in the GUI for instructions on installing the Model Expansion pack.
-    - This version of the GUI is fully backward compatible with the v4 models.
+<details id="WindowsManual">
+  <summary>Windows Manual Installation</summary>
 
-- **Please Note:** See the latest release page for more recent updates [here](https://github.com/Anjok07/ultimatevocalremovergui/releases/tag/v5.3.0)
+### Manual Windows Installation
 
-### Other Platforms
+- Download and extract the repository [here](https://github.com/Anjok07/ultimatevocalremovergui/archive/refs/heads/master.zip)
+- Download and install Python [here](https://www.python.org/ftp/python/3.9.8/python-3.9.8-amd64.exe)
+   - Make sure to check "Add python.exe to PATH" during the install
+- Run the following commands from the extracted repo directory:
 
-This application can be run on Mac & Linux by performing a manual install (see the **Manual Developer Installation** section below for more information). Some features may not be available on non-Windows platforms.
+```
+python.exe -m pip install -r requirements.txt
+```
 
-## Application Manual
+If you have a compatible Nvidia GPU, run the following command:
 
-**General Options**
+```
+python.exe -m pip install --upgrade torch --extra-index-url https://download.pytorch.org/whl/cu117
+```
 
-<img src="https://github.com/Anjok07/ultimatevocalremovergui/blob/master/img/gen_opt_new.png?raw=true" />
+If you do not have FFmpeg or Rubber Band installed and want to avoid going through the process of installing them the long way, follow the instructions below.
 
-**VR Architecture Options**
+**FFmpeg Installation**
 
-<img src="https://github.com/Anjok07/ultimatevocalremovergui/blob/master/img/vr_opt_new.png?raw=true" />
+- Download the precompiled build [here](https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip)
+- From the archive, extract the following file to the UVR application directory:
+   - ```ffmpeg-5.1.2-essentials_build/bin/ffmpeg.exe```
 
-**MDX-Net Options**
+**Rubber Band Installation**
 
-<img src="https://github.com/Anjok07/ultimatevocalremovergui/blob/master/img/mdx_opt.png?raw=true" />
+In order to use the Time Stretch or Change Pitch tool, you'll need Rubber Band.
 
-**Demucs v3 Options**
+- Download the precompiled build [here](https://breakfastquay.com/files/releases/rubberband-3.1.2-gpl-executable-windows.zip)
+- From the archive, extract the following files to the UVR application directory:
+   - ```rubberband-3.1.2-gpl-executable-windows/rubberband.exe```
+   - ```rubberband-3.1.2-gpl-executable-windows/sndfile.dll```
 
-<img src="https://github.com/Anjok07/ultimatevocalremovergui/blob/master/img/demucs_opt_new.png?raw=true" />
+</details>
 
-**Ensemble Options**
+### MacOS Installation
+- Please Note:
+    - The MacOS Sonoma mouse clicking issue has been fixed.
+    - MPS (GPU) acceleration for Mac M1 has been expanded to work with Demucs v4 and all MDX-Net models.
+    - This bundle is intended for those running macOS Big Sur and above.
+    - Application functionality for systems running macOS Catalina or lower is not guaranteed.
+    - Application functionality for older or budget Mac systems is not guaranteed.
+    - Once everything is installed, the application may take up to 5-10 minutes to start for the first time (depending on your Macbook).
 
-<img src="https://github.com/Anjok07/ultimatevocalremovergui/blob/master/img/ense_opt.png?raw=true" />
+- Download the UVR dmg for MacOS via one of the links below:
+    - Mac M1 (arm64) users:
+       - [Main Download Link](https://github.com/Anjok07/ultimatevocalremovergui/releases/download/v5.6/Ultimate_Vocal_Remover_v5_6_MacOS_arm64.dmg)
+       - [Main Download Link mirror](https://www.mediafire.com/file_premium/u3rk54wsqadpy93/Ultimate_Vocal_Remover_v5_6_MacOS_arm64.dmg/file)
 
-**User Ensemble**
+    - Mac Intel (x86_64) users:
+       - [Main Download Link](https://github.com/Anjok07/ultimatevocalremovergui/releases/download/v5.6/Ultimate_Vocal_Remover_v5_6_MacOS_x86_64.dmg)
+       - [Main Download Link mirror](https://www.mediafire.com/file_premium/2gf1werx5ly5ylz/Ultimate_Vocal_Remover_v5_6_MacOS_x86_64.dmg/file)
 
-<img src="https://github.com/Anjok07/ultimatevocalremovergui/blob/master/img/user_ens_opt.png?raw=true" />
+<details id="CannotOpen">
+  <summary>MacOS Users: Having Trouble Opening UVR?</summary>
+
+> Due to Apples strict application security, you may need to follow these steps to open UVR.
+>
+> First, run the following command via Terminal.app to allow applications to run from all sources (it's recommended that you re-enable this once UVR opens properly.)
+> 
+> ```bash
+> sudo spctl --master-disable
+> ```
+> 
+> Second, run the following command to bypass Notarization: 
+> 
+> ```bash
+> sudo xattr -rd com.apple.quarantine /Applications/Ultimate\ Vocal\ Remover.app
+> ```
+
+</details>
+
+<details id="MacInstall">
+  <summary>Manual MacOS Installation</summary>
+
+### Manual MacOS Installation
+
+- Download and save this repository [here](https://github.com/Anjok07/ultimatevocalremovergui/archive/refs/heads/master.zip)
+- Download and install Python 3.10 [here](https://www.python.org/ftp/python/3.10.9/python-3.10.9-macos11.pkg)
+- From the saved directory run the following - 
+
+```
+pip3 install -r requirements.txt
+```
+
+- If your Mac is running with an M1, please run the following command next. If not, skip this step. - 
+
+```
+cp /Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/site-packages/_soundfile_data/libsndfile_arm64.dylib /Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/site-packages/_soundfile_data/libsndfile.dylib
+```
+
+**FFmpeg Installation**
+
+- Once everything is done installing, download the correct FFmpeg binary for your system [here](http://www.osxexperts.net) and place it into the main application directory.
+
+**Rubber Band Installation**
+
+In order to use the Time Stretch or Change Pitch tool, you'll need Rubber Band.
+
+- Download the precompiled build [here](https://breakfastquay.com/files/releases/rubberband-3.1.2-gpl-executable-windows.zip)
+- From the archive, extract the following files to the UVR/lib_v5 application directory:
+   - ```rubberband-3.1.2-gpl-executable-macos/rubberband```
+
+This process has been tested on a MacBook Pro 2021 (using M1) and a MacBook Air 2017 and is confirmed to be working on both.
+
+</details>
+
+### Linux Installation
+
+<details id="LinuxInstall">
+  <summary>See Linux Installation Instructions</summary>
+
+<br />
+    
+**These install instructions are for Debian & Arch based Linux systems.**
+
+- Download and save this repository [here](https://github.com/Anjok07/ultimatevocalremovergui/archive/refs/heads/master.zip)
+- From the saved directory run the following commands in this order- 
+
+**For Debian Based (Ubuntu, Mint, etc.):**
+```
+sudo apt update && sudo apt upgrade
+sudo apt-get update
+sudo apt install ffmpeg
+sudo apt install python3-pip
+sudo apt-get -y install python3-tk
+pip3 install -r requirements.txt
+python3 UVR.py
+```
+
+**For Arch Based (EndeavourOS):**
+```
+sudo pacman -Syu
+sudo pacman -Sy
+sudo pacman -S python-pip
+sudo pacman -S --noconfirm tk
+sudo pacman -S ffmpeg
+```
+
+To bypass environment setup and proceed with the installation, use:
+
+- Take caution; this modifies system files.
+
+```
+sudo rm /usr/lib/python3.11/EXTERNALLY-MANAGED
+```
+
+Then proceed with the following in order:
+
+```
+chmod +x install_packages.sh
+./install_packages.sh
+python UVR.py
+```
+
+</details>
 
 ### Other Application Notes
-
+- Nvidia RTX 1060 6GB is the minimum requirement for GPU conversions.
 - Nvidia GPUs with at least 8GBs of V-RAM are recommended.
+- AMD Radeon GPU supported is limited at this time.
+   - There is currently a working branch for AMD GPU users [here](https://github.com/Anjok07/ultimatevocalremovergui/tree/v5.6-amd-gpu)
 - This application is only compatible with 64-bit platforms. 
-- This application relies on Sox - Sound Exchange for Noise Reduction.
+- This application relies on the Rubber Band library for the Time-Stretch and Pitch-Shift options.
 - This application relies on FFmpeg to process non-wav audio files.
 - The application will automatically remember your settings when closed.
 - Conversion times will significantly depend on your hardware. 
-- These models are computationally intensive. Please proceed with caution and pay attention to your PC to ensure it doesn't overheat. ***We are not responsible for any hardware damage.***
+- These models are computationally intensive. 
 
-## Change Log
-
-- **v4 vs. v5**
-   - The v5 models significantly outperform the v4 models.
-   - The extraction's aggressiveness can be adjusted using the "Aggression Setting." The default value of 10 is optimal for most tracks.
-   - All v2 and v4 models have been removed.
-   - Ensemble Mode added - This allows the user to get the most robust result from each model.
-   - Stacked models have been entirely removed.
-     The new aggression setting and model ensembling have replaced the stacked model feature.
-   - The NFFT, HOP_SIZE, and SR values are now set internally.
-   - The MDX-NET AI engine and models have been added.
-     - This is a brand new feature added to the UVR GUI. 
-     - 4 MDX-Net models are included in this package.
-     - The MDX-Net models provided were trained by the core UVR developers
-     - This network is less resource-intensive but incredibly powerful.
-     - MDX-Net is a Hybrid Waveform/Spectrogram network.
-   - The Demucs v3 AI engine and models have been added.
-   - The ability to separate all 4 stems through Demucs v3.
+### Performance:
+- Model load times are faster.
+- Importing/exporting audio files is faster.
 
 ## Troubleshooting
 
 ### Common Issues
 
 - If FFmpeg is not installed, the application will throw an error if the user attempts to convert a non-WAV file.
-- Memory allocation errors can usually be resolved by lowering the "Chunk Size".
+- Memory allocation errors can usually be resolved by lowering the "Segment" or "Window" sizes.
+
+#### MacOS Sonoma Left-click Bug
+There's a known issue on MacOS Sonoma where left-clicks aren't registering correctly within the app. This was impacting all applications built with Tkinter on Sonoma and has since been resolved. Please download the latest version via the following link if you are still experiencing issues - [link](https://github.com/Anjok07/ultimatevocalremovergui/releases/tag/v5.6)
+
+This issue was being tracked [here](https://github.com/Anjok07/ultimatevocalremovergui/issues/840).
 
 ### Issue Reporting
 
 Please be as detailed as possible when posting a new issue. 
 
 If possible, click the "Settings Button" to the left of the "Start Processing" button and click the "Error Log" button for detailed error information that can be provided to us.
-
-## Manual Installation (For Developers)
-
-These instructions are for those installing UVR v5.2.0 **manually** only.
-
-1. Download & install Python 3.9 or lower (but no lower than 3.6) [here](https://www.python.org/downloads/)
-    - **Note:** Ensure the *"Add Python to PATH"* box is checked
-2. Download the Source code [here](https://github.com/Anjok07/ultimatevocalremovergui/archive/refs/heads/master.zip)
-3. Download the models.zip [here](https://github.com/Anjok07/ultimatevocalremovergui/releases/download/v5.2.0/models.zip)
-4. Extract the *ultimatevocalremovergui-master* folder within ultimatevocalremovergui-master.zip where ever you wish.
-5. Extract the the folders within the models.zip to the *ultimatevocalremovergui-master/models* directory.
-6. Download the SoX archive [here](https://sourceforge.net/projects/sox/files/sox/14.4.2/sox-14.4.2-win32.zip/download) and extract the contents into the *ultimatevocalremovergui-master/lib_v5/sox* directory.
-7. Open the command prompt from the ultimatevocalremovergui-master directory and run the following commands, separately - 
-
-```
-pip install --no-cache-dir -r requirements.txt
-```
-```
-pip install torch==1.9.0+cu111 torchvision==0.10.0+cu111 torchaudio==0.9.0 -f https://download.pytorch.org/whl/torch_stable.html
-```
-
-From here you should be able to open and run the UVR.py file
-
-- FFmpeg 
-
-    - FFmpeg must be installed and configured for the application to process any track that isn't a *.wav* file. You will need to look up instruction on how to configure it on your operating system.
 
 ## License
 
@@ -138,12 +237,13 @@ The **Ultimate Vocal Remover GUI** code is [MIT-licensed](LICENSE).
 - **Please Note:** For all third-party application developers who wish to use our models, please honor the MIT license by providing credit to UVR and its developers.
 
 ## Credits
-
+- [ZFTurbo](https://github.com/ZFTurbo) - Created & trained the weights for the new MDX23C models. 
 - [DilanBoskan](https://github.com/DilanBoskan) - Your contributions at the start of this project were essential to the success of UVR. Thank you!
 - [Bas Curtiz](https://www.youtube.com/user/bascurtiz) - Designed the official UVR logo, icon, banner, and splash screen.
 - [tsurumeso](https://github.com/tsurumeso) - Developed the original VR Architecture code. 
 - [Kuielab & Woosung Choi](https://github.com/kuielab) - Developed the original MDX-Net AI code. 
 - [Adefossez & Demucs](https://github.com/facebookresearch/demucs) - Developed the original Demucs AI code. 
+- [KimberleyJSN](https://github.com/KimberleyJensen) - Advised and aided the implementation of the training scripts for MDX-Net and Demucs. Thank you!
 - [Hv](https://github.com/NaJeongMo/Colab-for-MDX_B) - Helped implement chunks into the MDX-Net AI code. Thank you!
 
 ## Contributing
